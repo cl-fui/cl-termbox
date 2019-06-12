@@ -15,6 +15,7 @@ If you use Slime and Emacs, take a minute to figure out what's happening.
 First of all, you cannot just start SLIME - there is no terminal (Emacs buffer is not a terminal).  So you need to start a separate SWANK session in a real terminal:
 
 SBCL:`sbcl --eval "(progn (ql:quickload '(:swank) :silent t)" --eval "(swank:create-server :port 4006 :dont-close t)"`
+
 Roswell: `ros run -e "(progn (ql:quickload '(:swank) :silent t)" -e "(swank:create-server :port 4006 :dont-close t) (loop (sleep 10000))) "`
 
 Now SWANK is running in a thread talking to SLIME, but the terminal most likely has a separate REPL in it.  The REPL will eat characters and print things, messing up your output.  So you probably want to sleep the thread with something like `(loop (sleep 10000))` (or something wiser than that)
