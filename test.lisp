@@ -14,7 +14,7 @@
 	 (loop for c from DEFAULT to WHITE
 	    for fg = (+ c (aref all-attrs a))
 	    do
-	      (change-cell& x y (char-code (aref chars current-char)) fg bg)
+	      (change-cell x y (char-code (aref chars current-char)) fg bg)
 	      (setf current-char (next-char current-char)
 		    x (1+ x))	      ))))
 
@@ -28,19 +28,19 @@
 	    (incf sy)) ))
 
 (defun draw-all ()
-  (clear&)
-  (select-output-mode& OUTPUT-NORMAL)
+  (clear)
+  (select-output-mode OUTPUT-NORMAL)
   (let ((col1 #(0 #.A-REVERSE))) ;;	(col2 #(#.A-REVERSE))
     ;;(print-combinations-table 1 1 col1 2)
     )
-  (present&)
-  (select-output-mode& OUTPUT-256)
+  (present)
+  (select-output-mode OUTPUT-256)
   (loop for x from 0 below 255 do
        (print x)
-       (change-cell& x 23 (char-code #\@) x 0)
-       (change-cell& x 24 (char-code #\ ) 0 x)
+       (change-cell x 23 (char-code #\@) x 0)
+       (change-cell x 24 (char-code #\ ) 0 x)
        )
-  (present&)
+  (present)
   )
 
 

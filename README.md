@@ -2,6 +2,10 @@
 
 **CL-TERMBOX** is a set of cffi bindings to the tiny [TERMBOX](https://github.com/nsf/termbox) library for terminal output.  `libtermbox` is a simplistic text-mode library for building user-interfaces based on a rectangular grid of character cells.  CL-TERMBOX is a set of CFFI bindings and an attempt to minimally lispify it.
 
+As this is a low-level binding library, it is pretty much a verbatim wrapper around termbox and termbox documentation should be consulted.  A minimal error trap around init and shutdown will report TB-ERROR but keep in mind that shutting down more than once will result in a SIGABRT. 
+
+Termbox symbols are exported from CL-TERMBOX and may be accessed using the TB nickname, e.g. `(tb:init)` or `tb:KEY-CTRL-I`.  See `package.lisp` file for all exports
+
 ## STATUS
 
 Work in progress.

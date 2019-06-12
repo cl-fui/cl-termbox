@@ -79,6 +79,8 @@
 (defparameter  MOD-ALT    #x01)
 (defparameter  MOD-MOTION #x02)
 
+(defconstant HIDE-CURSOR -1)
+
 ;;/* Colors (see struct tb-cell's fg and bg fields). */
 (defparameter  DEFAULT #x00)
 (defparameter  BLACK   #x01)
@@ -108,7 +110,7 @@
  *  - 'bg' background color and attributes
  */
 ||#
-(defcstruct  tb-uint32 
+(defcstruct  tb-cell 
   (ch :uint32)
   (fg :uint16)
   (bg :uint16));
@@ -127,9 +129,9 @@
 ||#
 (defcstruct tb-event 
   (type :uint8)
-  (mod  :uint8)	; /* modifiers to either 'key' or 'ch' below */
-  (key  :uint16)	 ; /* one of the KEY-* constants */
-  (ch   :uint32)	 ; /* unicode character */
+  (mod  :uint8)	 ; /* modifiers to either 'key' or 'ch' below */
+  (key  :uint16) ; /* one of the KEY-* constants */
+  (ch   :uint32) ; /* unicode character */
   (w    :int32)
   (h    :int32)
   (x    :int32)
@@ -143,61 +145,203 @@
  * most cases you should just check the returned code as < 0.
  */
 ||#
-(defparameter  EUNSUPPORTED-TERMINAL -1)
-(defparameter  EFAILED-TO-OPEN-TTY   -2)
-(defparameter  EPIPE-TRAP-ERROR      -3)
+(defconstant  EUNSUPPORTED-TERMINAL -1)
+(defconstant  EFAILED-TO-OPEN-TTY   -2)
+(defconstant  EPIPE-TRAP-ERROR      -3)
 
 
-(defparameter  INPUT-CURRENT 0);; /* 000 */
-(defparameter  INPUT-ESC     1);; /* 001 */
-(defparameter  INPUT-ALT     2);; /* 010 */
-(defparameter  INPUT-MOUSE   4);; /* 100 */
+(defconstant  INPUT-CURRENT 0);; /* 000 */
+(defconstant  INPUT-ESC     1);; /* 001 */
+(defconstant  INPUT-ALT     2);; /* 010 */
+(defconstant  INPUT-MOUSE   4);; /* 100 */
 
-(defparameter  OUTPUT-CURRENT   0)
-(defparameter  OUTPUT-NORMAL    1)
-(defparameter  OUTPUT-256       2)
-(defparameter  OUTPUT-216       3)
-(defparameter  OUTPUT-GRAYSCALE 4)
+(defconstant  OUTPUT-CURRENT   0)
+(defconstant  OUTPUT-NORMAL    1)
+(defconstant  OUTPUT-256       2)
+(defconstant  OUTPUT-216       3)
+(defconstant  OUTPUT-GRAYSCALE 4)
 
+(define-condition tb-error (error)
+  ((kind
+    :initarg :kind
+    :accessor :tb-error-kind
+    :initform nil)   )
+  (:documentation "Signaled when textbox library returns an error."))
+;;=============================================================================
+;; 12 official functions
+;;
+;;=============================================================================
+#|| Initializes the termbox library. This function should be called before any
+ * other functions. Function tb_init is same as tb_init_file("/dev/tty").
+ * After successful initialization, the library must be
+ * finalized using the tb_shutdown() function.
+||#
 (defcfun ("tb_init" init&) :int)
+(defcfun ("tb_init_file" init-file&) :int
+  (name :string))
+(defcfun ("tb_init_fd" init-fd&) :int
+  (inout :int))
 (defcfun ("tb_shutdown" shutdown&) :int)
 
-(defcfun ("tb_width" width&) :int)
-(defcfun ("tb_height" height&) :int)
-
-(defcfun ("tb_clear" clear&) :void)
-(defcfun ("tb_set_clear_attributes" set-clear-attributes&) :void
+(defun init-error (numeric-error-code)
+  (error 'cl-textbox-error
+	 :kind (case numeric-error-code
+		 (-1 EUNSUPPORTED-TERMINAL)
+		 (-2 EFAILED-TO-OPEN-TTY)
+		 (-3 EPIPE-TRAP-ERROR)
+		 (T 'UNKNOWN-ERROR))))
+(defun init ()
+  (let ((result (init&)))
+    (when (minusp result) (init-error result))))
+(defun init-file (filename)
+  (let ((result (init-file& filename)))
+    (when (minusp result) (init-error result))))
+(defun init-fd (fd)
+  (let ((result (init-file& fd)))
+    (when (minusp result) (init-error result))))
+(defun shutdown ()
+  (let ((result (shutdown&)))
+    (when (minusp result) (init-error result))))
+;;=============================================================================
+#|| Returns the size of the internal back buffer (which is the same as
+ * terminal's window size in characters). The internal buffer can be resized
+ * after tb_clear() or tb_present() function calls. Both dimensions have an
+ * unspecified negative value when called before tb_init() or after
+ * tb_shutdown().
+||#
+(defcfun ("tb_width" width) :int)
+(defcfun ("tb_height" height) :int)
+;;=============================================================================
+#|| Clears the internal back buffer using TB_DEFAULT color or the
+ * color/attributes set by tb_set_clear_attributes() function.
+||#
+(defcfun ("tb_clear" clear) :void)
+(defcfun ("tb_set_clear_attributes" set-clear-attributes) :void
   (fg :uint16) (bg :uint16))
+;;=============================================================================
+;; Synchronizes the internal back buffer with the terminal.
+;;
+(defcfun ("tb_present" present) :void)
+;;=============================================================================
+#|| Sets the position of the cursor. Upper-left character is (0, 0). If you pass
+ * TB_HIDE_CURSOR as both coordinates, then the cursor will be hidden. Cursor
+ * is hidden by default.
+||#
 
-(defcfun ("tb_present" present&) :void)
-
-(defcfun ("tb_set_cursor" set-cursor&) :void
+(defcfun ("tb_set_cursor" set-cursor) :void
   (cx :int) (cy :int))
 
-(defcfun ("tb_put_cell" put-cell&) :void
+;;=============================================================================
+#|| Changes cell's parameters in the internal back buffer at the specified
+ * position.
+||#
+(defcfun ("tb_put_cell" put-cell) :void
   (x :int) (y :int) (cell :pointer))
-(defcfun ("tb_change_cell" change-cell&) :void
+(defcfun ("tb_change_cell" change-cell) :void
   (x :int) (y :int) (ch :uint32)   (fg :uint16) (bg :uint16))
 
-(defcfun ("tb_blit" blit&) :void
+;;=============================================================================
+#|| Copies the buffer from 'cells' at the specified position, assuming the
+ * buffer is a two-dimensional array of size ('w' x 'h'), represented as a
+ * one-dimensional buffer containing lines of cells starting from the top.
+ *
+ * (DEPRECATED: use tb_cell_buffer() instead and copy memory on your own)
+||#
+(defcfun ("tb_blit" blit) :void
   (x :int) (y :int) (w :int) (h :int) (cells :pointer))
 
-(defcfun ("tb_cell_buffer" cell-buffer&) :pointer)
-(defcfun ("tb_select_input_mode" select-input-mode&) :int
+;;=============================================================================
+#|| Returns a pointer to internal cell back buffer. You can get its dimensions
+ * using tb_width() and tb_height() functions. The pointer stays valid as long
+ * as no tb_clear() and tb_present() calls are made. The buffer is
+ * one-dimensional buffer containing lines of cells starting from the top.
+ *||#
+(defcfun ("tb_cell_buffer" cell-buffer) :pointer)
+
+;;=============================================================================
+#|| Sets the termbox input mode. Termbox has two input modes:
+ * 1. Esc input mode.
+ *    When ESC sequence is in the buffer and it doesn't match any known
+ *    ESC sequence => ESC means TB_KEY_ESC.
+ * 2. Alt input mode.
+ *    When ESC sequence is in the buffer and it doesn't match any known
+ *    sequence => ESC enables TB_MOD_ALT modifier for the next keyboard event.
+ *
+ * You can also apply TB_INPUT_MOUSE via bitwise OR operation to either of the
+ * modes (e.g. TB_INPUT_ESC | TB_INPUT_MOUSE). If none of the main two modes
+ * were set, but the mouse mode was, TB_INPUT_ESC mode is used. If for some
+ * reason you've decided to use (TB_INPUT_ESC | TB_INPUT_ALT) combination, it
+ * will behave as if only TB_INPUT_ESC was selected.
+ *
+ * If 'mode' is TB_INPUT_CURRENT, it returns the current input mode.
+ *
+ * Default termbox input mode is TB_INPUT_ESC.
+||#
+(defcfun ("tb_select_input_mode" select-input-mode) :int
   (mode :int))
-(defcfun ("tb_select_output_mode" select-output-mode&) :int
-  (mode :int))
-(defcfun ("tb_peek_event" peek-event&) :int
+
+;;=============================================================================
+#||  Sets the termbox output mode. Termbox has three output options:
+ * 1. TB_OUTPUT_NORMAL     => [1..8]
+ *    This mode provides 8 different colors:
+ *      black, red, green, yellow, blue, magenta, cyan, white
+ *    Shortcut: TB_BLACK, TB_RED, ...
+ *    Attributes: TB_BOLD, TB_UNDERLINE, TB_REVERSE
+ *
+ *    Example usage:
+ *        tb_change_cell(x, y, '@', TB_BLACK | TB_BOLD, TB_RED);
+ *
+ * 2. TB_OUTPUT_256        => [0..256]
+ *    In this mode you can leverage the 256 terminal mode:
+ *    0x00 - 0x07: the 8 colors as in TB_OUTPUT_NORMAL
+ *    0x08 - 0x0f: TB_* | TB_BOLD
+ *    0x10 - 0xe7: 216 different colors
+ *    0xe8 - 0xff: 24 different shades of grey
+ *
+ *    Example usage:
+ *        tb_change_cell(x, y, '@', 184, 240);
+ *        tb_change_cell(x, y, '@', 0xb8, 0xf0);
+ *
+ * 3. TB_OUTPUT_216        => [0..216]
+ *    This mode supports the 3rd range of the 256 mode only.
+ *    But you don't need to provide an offset.
+ *
+ * 4. TB_OUTPUT_GRAYSCALE  => [0..23]
+ *    This mode supports the 4th range of the 256 mode only.
+ *    But you dont need to provide an offset.
+ *
+ * Execute build/src/demo/output to see its impact on your terminal.
+ *
+ * If 'mode' is TB_OUTPUT_CURRENT, it returns the current output mode.
+ *
+ * Default termbox output mode is TB_OUTPUT_NORMAL.
+ * ||#
+ (defcfun ("tb_select_output_mode" select-output-mode) :int
+   (mode :int))
+;;=============================================================================
+#|| Wait for an event up to 'timeout' milliseconds and fill the 'event'
+ * structure with it, when the event is available. Returns the type of the
+ * event (one of TB_EVENT_* constants) or -1 if there was an error or 0 in case
+ * there were no event during 'timeout' period.
+||#
+(defcfun ("tb_peek_event" peek-event) :int
   (event :pointer) (timeout :int))
-(defcfun ("tb_poll_event" poll-event&) :int
+;;=============================================================================
+#|| Wait for an event forever and fill the 'event' structure with it, when the
+ * event is available. Returns the type of the event (one of TB_EVENT_*
+ * constants) or -1 if there was an error.
+||#
+(defcfun ("tb_poll_event" poll-event) :int
   (event :pointer))
 
-(defcfun ("tb_utf8_char_length" utf8-char-length&) :int
+;;=============================================================================
+(defcfun ("tb_utf8_char_length" utf8-char-length) :int
   (char :int))
-
-(defcfun ("tb_utf8_char_to_unicode" utf8-char-to-unicode&) :int
+;;=============================================================================
+(defcfun ("tb_utf8_char_to_unicode" utf8-char-to-unicode) :int
   (out (:pointer :uint32) (char :uint32)))
-(defcfun ("tb_cutf8_unicode_to_char" utf8-unicode-to-char&) :int
+;;=============================================================================
+(defcfun ("tb_utf8_unicode_to_char" utf8-unicode-to-char) :int
   (out (:pointer :uint32) (c :uint32)))
 
 
