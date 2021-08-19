@@ -8,5 +8,7 @@
   :depends-on (:cffi)
   :components ((:file "package")
 	       (:file "loadlib")
-	       (:file "tb")))
+	       (:file "tb.bindings")
+	       (:file "tb")
+	       ))
 

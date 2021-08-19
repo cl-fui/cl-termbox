@@ -1,16 +1,21 @@
 # cl-termbox
 
-**CL-TERMBOX** is a set of cffi bindings to the tiny [TERMBOX](https://github.com/nsf/termbox) library for terminal output.  `libtermbox` is a simplistic text-mode library for building user-interfaces based on a rectangular grid of character cells.  CL-TERMBOX is a set of CFFI bindings and an attempt to minimally lispify it.
+**CL-TERMBOX** is a set of cffi bindings to the tiny [TERMBOX](https://github.com/termbox/termbox) library for terminal output. 
 
-As this is a low-level binding library, it is pretty much a verbatim wrapper around termbox and termbox documentation should be consulted.  A minimal error trap around init and shutdown will report TB-ERROR but keep in mind that shutting down more than once will result in a SIGABRT. 
+## Overview
+
+`libtermbox` is a simplistic text-mode library for building user-interfaces based on a rectangular grid of character cells.  
+
+CL-TERMBOX is a hand-built set of verbatim CFFI bindings.  Around it, there is a very thin Lispy layer for functions that need help.
+
 
 Termbox symbols are exported from CL-TERMBOX and may be accessed using the TB nickname, e.g. `(tb:init)` or `tb:KEY-CTRL-I`.  See `package.lisp` file for all exports
 
 ## STATUS
 
-Work in progress.
-
 Low-level bindings implemented.   Only linux bindings are loaded (see `loadlib.lisp`).  If you get it running on other machines, please let me know - or open a pull request.
+
+
 
 ## Getting started - for EMACS/Slime users:
 
@@ -27,5 +32,6 @@ Connect to it from Emacs with `slime-connect`, entering the same port (4006 in t
 
 In some cases swank may work better with `:style :fd-handler`.
 
-
 Now, call `(tb:init)` to connect to the terminal.  When done, call `(tb:shutdown)`.
+
+A minimal error trap around init and shutdown will report TB-ERROR but keep in mind that shutting down more than once will result in a SIGABRT. 
