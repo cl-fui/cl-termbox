@@ -8,12 +8,5 @@
   :depends-on (:cffi)
   :components ((:file "package")
 	       (:file "loadlib")
-	       (:file "tb")
-;;	       (:file "include")
-;;	       (:file "ncurses")
-;;	       (:file "keys")
-;;	       (:file "panel")
-;;	       (:file "menu")
-;;	       (:file "form")
-	       ))
+	       (:file "tb")))
 

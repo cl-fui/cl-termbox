@@ -1,4 +1,11 @@
 (in-package :tb)
+#||  TEST.LISP
+
+Excersize some functions...
+
+
+||#
+
 
 (defparameter chars "nnnnnnnnnbbbbbbbbbuuuuuuuuuBBBBBBBBB")
 (defparameter all-attrs #(0 #.A-BOLD #.A-UNDERLINE #. (+ A-BOLD A-UNDERLINE)))
@@ -28,19 +35,21 @@
 	    (incf sy)) ))
 
 (defun draw-all ()
+  ;;(init)
   (clear)
   (select-output-mode OUTPUT-NORMAL)
   (let ((col1 #(0 #.A-REVERSE))) ;;	(col2 #(#.A-REVERSE))
-    ;;(print-combinations-table 1 1 col1 2)
+    (print-combinations-table 1 1 col1 2)
     )
   (present)
   (select-output-mode OUTPUT-256)
   (loop for x from 0 below 255 do
-       (print x)
+       ;;(print x)
        (change-cell x 23 (char-code #\@) x 0)
        (change-cell x 24 (char-code #\ ) 0 x)
        )
   (present)
+  ;;(shutdown)
   )
 
 

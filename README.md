@@ -14,9 +14,9 @@ Low-level bindings implemented.   Only linux bindings are loaded (see `loadlib.l
 
 ## Getting started - for EMACS/Slime users:
 
-CL-TERMBOX runs in a real terminal.  These bindings control the terminal that started Lisp.  If you start your CL implementation from a terminal, things make sense. If you use Slime and Emacs, please take a minute to figure out what's happening.
+CL-TERMBOX runs in a **real terminal**.  These bindings control the terminal that started Lisp.  If you start your CL implementation from a terminal, things make sense. If you use Slime and Emacs, please take a minute to figure out what's happening.
 
-First of all, you cannot just start SLIME - there is no terminal (Emacs buffer is not a terminal).  So you need to start a separate SWANK session in a real terminal:
+First of all, you cannot just start SLIME - there is no terminal! (_Emacs buffer is not a terminal_).  So you need to start a separate SWANK session in a real terminal:
 
 SBCL:`sbcl --eval "(progn (ql:quickload '(:swank) :silent t))" --eval "(swank:create-server :port 4006 :dont-close t)"`
 
@@ -28,3 +28,4 @@ Connect to it from Emacs with `slime-connect`, entering the same port (4006 in t
 In some cases swank may work better with `:style :fd-handler`.
 
 
+Now, call `(tb:init)` to connect to the terminal.  When done, call `(tb:shutdown)`.
