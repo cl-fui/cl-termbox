@@ -115,6 +115,9 @@
   (fg :uint16)
   (bg :uint16));
 
+
+
+
 (defparameter  EVENT-KEY    1)
 (defparameter  EVENT-RESIZE 2)
 (defparameter  EVENT-MOUSE  3)
@@ -184,36 +187,37 @@
  * unspecified negative value when called before tb_init() or after
  * tb_shutdown().
 ||#
-(defcfun ("tb_width" width) :int)
-(defcfun ("tb_height" height) :int)
+(defcfun ("tb_width" width&) :int)
+(defcfun ("tb_height" height&) :int)
 ;;=============================================================================
 #|| Clears the internal back buffer using TB_DEFAULT color or the
  * color/attributes set by tb_set_clear_attributes() function.
 ||#
-(defcfun ("tb_clear" clear) :void)
-(defcfun ("tb_set_clear_attributes" set-clear-attributes) :void
+(defcfun ("tb_clear" clear&) :void)
+(defcfun ("tb_set_clear_attributes" set-clear-attributes&) :void
   (fg :uint16) (bg :uint16))
 ;;=============================================================================
 ;; Synchronizes the internal back buffer with the terminal.
 ;;
-(defcfun ("tb_present" present) :void)
+(defcfun ("tb_present" present&) :void)
 ;;=============================================================================
 #|| Sets the position of the cursor. Upper-left character is (0, 0). If you pass
  * TB_HIDE_CURSOR as both coordinates, then the cursor will be hidden. Cursor
  * is hidden by default.
 ||#
 
-(defcfun ("tb_set_cursor" set-cursor) :void
+(defcfun ("tb_set_cursor" set-cursor&) :void
   (cx :int) (cy :int))
 
 ;;=============================================================================
 #|| Changes cell's parameters in the internal back buffer at the specified
  * position.
 ||#
-(defcfun ("tb_put_cell" put-cell) :void
+(defcfun ("tb_put_cell" put-cell&) :void
   (x :int) (y :int) (cell :pointer))
-(defcfun ("tb_change_cell" change-cell) :void
-  (x :int) (y :int) (ch :uint32)   (fg :uint16) (bg :uint16))
+
+(defcfun ("tb_change_cell" change-cell&)  :void
+  (x :int) (y :int) (ch :uint32)  (fg :uint16) (bg :uint16))
 
 ;;=============================================================================
 #|| Copies the buffer from 'cells' at the specified position, assuming the
@@ -222,7 +226,7 @@
  *
  * (DEPRECATED: use tb_cell_buffer() instead and copy memory on your own)
 ||#
-(defcfun ("tb_blit" blit) :void
+(defcfun ("tb_blit" blit&) :void
   (x :int) (y :int) (w :int) (h :int) (cells :pointer))
 
 ;;=============================================================================
@@ -231,7 +235,7 @@
  * as no tb_clear() and tb_present() calls are made. The buffer is
  * one-dimensional buffer containing lines of cells starting from the top.
  *||#
-(defcfun ("tb_cell_buffer" cell-buffer) :pointer)
+(defcfun ("tb_cell_buffer" cell-buffer&) :pointer)
 
 ;;=============================================================================
 #|| Sets the termbox input mode. Termbox has two input modes:
@@ -252,7 +256,7 @@
  *
  * Default termbox input mode is TB_INPUT_ESC.
 ||#
-(defcfun ("tb_select_input_mode" select-input-mode) :int
+(defcfun ("tb_select_input_mode" select-input-mode&) :int
   (mode :int))
 
 ;;=============================================================================
@@ -291,7 +295,7 @@
  *
  * Default termbox output mode is TB_OUTPUT_NORMAL.
  * ||#
- (defcfun ("tb_select_output_mode" select-output-mode) :int
+ (defcfun ("tb_select_output_mode" select-output-mode&) :int
    (mode :int))
 ;;=============================================================================
 #|| Wait for an event up to 'timeout' milliseconds and fill the 'event'
@@ -299,25 +303,29 @@
  * event (one of TB_EVENT_* constants) or -1 if there was an error or 0 in case
  * there were no event during 'timeout' period.
 ||#
-(defcfun ("tb_peek_event" peek-event) :int
+(defcfun ("tb_peek_event" peek-event&) :int
   (event :pointer) (timeout :int))
 ;;=============================================================================
 #|| Wait for an event forever and fill the 'event' structure with it, when the
  * event is available. Returns the type of the event (one of TB_EVENT_*
  * constants) or -1 if there was an error.
 ||#
-(defcfun ("tb_poll_event" poll-event) :int
+(defcfun ("tb_poll_event" poll-event&) :int
   (event :pointer))
 
+
+
 ;;=============================================================================
-(defcfun ("tb_utf8_char_length" utf8-char-length) :int
-  (char :int))
+;; UTF8 and Unicode utility functions...
+;;
+(defcfun ("tb_utf8_char_length" utf8-char-length&) :int
+  (char :uint))
 ;;=============================================================================
-(defcfun ("tb_utf8_char_to_unicode" utf8-char-to-unicode) :int
-  (out (:pointer :uint32) (char :uint32)))
+(defcfun ("tb_utf8_char_to_unicode" utf8-char-to-unicode&) :uint32
+  (out (:pointer :uint32)) (char (:pointer :uint32)))
 ;;=============================================================================
-(defcfun ("tb_utf8_unicode_to_char" utf8-unicode-to-char) :int
-  (out (:pointer :uint32) (c :uint32)))
+(defcfun ("tb_utf8_unicode_to_char" utf8-unicode-to-char&) :int
+  (out (:pointer :uint32)) (c :uint32))
 
 
 

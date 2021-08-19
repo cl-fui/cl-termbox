@@ -34,4 +34,8 @@ In some cases swank may work better with `:style :fd-handler`.
 
 Now, call `(tb:init)` to connect to the terminal.  When done, call `(tb:shutdown)`.
 
+### Notes:
+
+Make sure you set an output mode that makes sense.  My terminal defaults to a mode in which colors were off by one.
+
 A minimal error trap around init and shutdown will report TB-ERROR but keep in mind that shutting down more than once will result in a SIGABRT. 

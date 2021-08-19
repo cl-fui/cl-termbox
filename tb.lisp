@@ -33,3 +33,25 @@
     (when (minusp result) (init-error result))))
 
 
+(defmacro width () `(width&))
+(defmacro height () `(height&))
+
+(defmacro clear () `(height&))
+(defmacro set-clear-attributes (fg bg)
+  `(set-clear-attributes& ,fg ,bg))
+(defmacro present () `(present&))
+
+(defmacro set-cursor (x y)
+  `(set-cursor& ,x ,y))
+;; tb:put-cell stores a cell from a cell ptr, so we leave it alone.
+(defmacro change-cell (x y ch fg bg)
+  `(change-cell& ,x ,y ,ch ,fg ,bg))
+;; tb:blit is deprecated...
+;; cell-buffer& returns a buffer pointer...
+(defmacro select-input-mode (mode)
+  `(select-input-mode& ,mode))
+
+(defmacro select-output-mode (mode)
+  `(select-output-mode& ,mode))
+
+;;poll-event and peek-event
