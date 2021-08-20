@@ -32,17 +32,19 @@
   (let ((result (shutdown&)))
     (when (minusp result) (init-error result))))
 
-
 (defmacro width () `(width&))
 (defmacro height () `(height&))
+
+(defparameter *CUR-X* 0)
+(defparameter *CUR-Y* 0)
 
 (defmacro clear () `(clear&))
 (defmacro set-clear-attributes (fg bg)
   `(set-clear-attributes& ,fg ,bg))
 (defmacro present () `(present&))
 
-(defmacro set-cursor (x y)
-  `(set-cursor& ,x ,y))
+(defun set-cursor (x y)
+  (set-cursor (setf *CUR-X* x) (setf *CUR-Y* y)))
 ;; tb:put-cell stores a cell from a cell ptr, so we leave it alone.
 (defmacro change-cell (x y ch fg bg)
   `(change-cell& ,x ,y ,ch ,fg ,bg))
