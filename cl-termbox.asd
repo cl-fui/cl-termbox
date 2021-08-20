@@ -1,9 +1,9 @@
 ;;
 ;;
 (asdf:defsystem #:cl-termbox
-  :description "termbox bindings"
+  :description "Bindings to termbox library, for text-mode terminal applications without curses"
   :author "StackSmith <fpgasm@apple2.x10.mx>"
-  :license "BSD 3-clause license"
+  :license "MIT license"
   :serial t
   :depends-on (:cffi)
   :components ((:file "package")
