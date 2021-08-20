@@ -4,7 +4,7 @@
 
 ## Overview
 
-`libtermbox` is a simplistic text-mode library for building user-interfaces based on a rectangular grid of character cells.  
+`libtermbox` is a simplistic text-mode library for building user-interfaces based on a rectangular grid of character cells, supporting keyboard and mouse input.
 
 CL-TERMBOX is a hand-built set of CFFI bindings, providing a verbatim low-level set of bindings, and a very thin lisp wrapper.  Currently, only linux bindings are loaded.  If you need to get it working on another machine, please open an issue or a pull request.
 
