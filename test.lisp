@@ -55,3 +55,15 @@ Excersize some functions...
 
 
 
+(defun pr (str &optional (fg tb:DEFAULT) (bg tb:DEFAULT))
+  "Output str at cursor position; advance cursor.  No wrap"
+  (loop :for x :from *CUR-X*
+	:for ch :across str
+	:do
+	  (change-cell x *CUR-Y* (char-code ch) fg bg)
+	:finally
+	   (set-cursor x *CUR-Y*))
+)
+
+
+

@@ -65,4 +65,14 @@
     (convert-from-foreign ev '(:struct tb-event))
     )
   )
+
+(defun keytest ()
+  (loop  for res = (poll-event) do
+    (format t "(~A ,~A):~A ~A ~A~%"
+	    (getf res 'x)
+	    (getf res 'y)
+	    (getf res 'key)
+	    (getf res 'mod)
+	    (code-char (getf res 'ch))
+	    )))
 ||#
