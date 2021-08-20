@@ -55,3 +55,12 @@
   `(select-output-mode& ,mode))
 
 ;;poll-event and peek-event
+;(defparameter *ev* (make-tb-even ))
+#||
+(defun poll-event ()
+  (with-foreign-object (ev '(:struct tb-event))
+    (poll-event& ev)
+    (convert-from-foreign ev '(:struct tb-event))
+    )
+  )
+||#

@@ -18,10 +18,8 @@ A few bindings are low-level only and have no high-level wrapper:
 * `tb::blit&` is available, but is deprecated.  
 * `tb::put-cell&` stores a cell via a pointer parameter, and the Lisp use-case is unclear.
 * `tb::cell-buffer&` returns a pointer to the buffer, and the use-case is unclear.
-
-
-* `tb::poll-event&` and `tb::peek-event&` return a raw foreign structure.  To be fixed.
-* utf/unicode functions deal with buffer pointers and the Lisp use-case is unclear.
+* utf/unicode functions deal with foreign pointers and the Lisp use-case is unclear.
+* `tb::poll-event&` and `tb::peek-event&` return a raw foreign structure.  Generally, the application will pre-allocate an event record and pass it to the poll/peek routine to be filled.  Upon return, the application typically needs a couple of values, so translating the entire structure to Lisp is unwise.  A custom extractor is probably a better solution. 
 
 ## Getting started - for EMACS/Slime users:
 
