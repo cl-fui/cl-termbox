@@ -11,14 +11,16 @@
    #:clear #:set-clear-attributes
    #:present
    #:set-cursor
-   #:put-cell #:change-cell
-   #:blit #:cell-buffer
+   ;; #:put-cell
+   #:change-cell
+   ;; #:blit
+   #:cell-buffer
    #:select-input-mode
    #:select-output-mode
    ;;#:peek-event #:poll-event
-   #:utf8-char-length
-   #:utf8-char-to-unicode
-   #:utf8-unicode-to-char
+   ;;#:utf8-char-length
+   ;;#:utf8-char-to-unicode
+   ;;#:utf8-unicode-to-char
    )
   ;; Keys:
   (:export

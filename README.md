@@ -6,28 +6,31 @@
 
 `libtermbox` is a simplistic text-mode library for building user-interfaces based on a rectangular grid of character cells.  
 
-CL-TERMBOX is a hand-built set of verbatim CFFI bindings.  Around it, there is a very thin Lispy layer for functions that need help.
+CL-TERMBOX is a hand-built set of CFFI bindings, providing a verbatim low-level set of bindings, and a very thin lisp wrapper.  Currently, only linux bindings are loaded.  If you need to get it working on another machine, please open an issue or a pull request.
+
+## Detail
+
+All C names are converted to Lisp conventions by removing the `tb_` prefix and replacing underscores with dashes.  All low-level C bindings have a `&` suffix; Lisp layer functions has no such suffix.  In many cases, Lisp layer simply invokes the binding.
+
+Low-level calls are not exported and should be accessed with a `TB::` prefix (and a `&` suffix).  High-level functions are exported, and should be accessed with a `TB:` prefix.  See `package.lisp` file for all exports.
+
+A few bindings are low-level only and have no high-level wrapper:
+* `tb::blit&` is available, but is deprecated.  
+* `tb::put-cell&` stores a cell via a pointer parameter, and the Lisp use-case is unclear.
+* `tb::cell-buffer&` returns a pointer to the buffer, and the use-case is unclear.
 
 
-Termbox symbols are exported from CL-TERMBOX and may be accessed using the TB nickname, e.g. `(tb:init)` or `tb:KEY-CTRL-I`.  See `package.lisp` file for all exports
-
-## STATUS
-
-Low-level bindings implemented.   Only linux bindings are loaded (see `loadlib.lisp`).  If you get it running on other machines, please let me know - or open a pull request.
-
-
+* `tb::poll-event&` and `tb::peek-event&` return a raw foreign structure.  To be fixed.
+* utf/unicode functions deal with buffer pointers and the Lisp use-case is unclear.
 
 ## Getting started - for EMACS/Slime users:
 
-CL-TERMBOX runs in a **real terminal**.  These bindings control the terminal that started Lisp.  If you start your CL implementation from a terminal, things make sense. If you use Slime and Emacs, please take a minute to figure out what's happening.
+CL-TERMBOX runs in a **real terminal**.  In order to use these bindings, Lisp must be started in a shell, and not from Emacs.  However, if Lisp is running SWANK, Emacs can connect to it.
 
-First of all, you cannot just start SLIME - there is no terminal! (_Emacs buffer is not a terminal_).  So you need to start a separate SWANK session in a real terminal:
-
-SBCL:`sbcl --eval "(progn (ql:quickload '(:swank) :silent t))" --eval "(swank:create-server :port 4006 :dont-close t)"`
+SBCL:`sbcl --eval "(progn (ql:quickload '(:swank) :silent t))" --eval "(progn (swank:create-server :port 4006 :dont-close t)(loop (sleep 10000)))"`
 
 Roswell: `ros run -e "(progn (ql:quickload '(:swank) :silent t))" -e "(progn (swank:create-server :port 4006 :dont-close t) (loop (sleep 10000))) "`
 
-Now SWANK is running in a thread talking to SLIME, but the terminal most likely has a separate REPL in it.  The REPL will eat characters and print things, messing up your output.  So you probably want to sleep the thread with something like `(loop (sleep 10000))` (or something smarter)
 Connect to it from Emacs with `slime-connect`, entering the same port (4006 in this case).
 
 In some cases swank may work better with `:style :fd-handler`.

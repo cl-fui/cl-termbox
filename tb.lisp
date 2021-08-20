@@ -36,7 +36,7 @@
 (defmacro width () `(width&))
 (defmacro height () `(height&))
 
-(defmacro clear () `(height&))
+(defmacro clear () `(clear&))
 (defmacro set-clear-attributes (fg bg)
   `(set-clear-attributes& ,fg ,bg))
 (defmacro present () `(present&))
