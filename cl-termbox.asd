@@ -1,7 +1,7 @@
 ;;
 ;;
 (asdf:defsystem #:cl-termbox
-  :description "termbox bindings"
+  :description "Bindings for termbox library, a minimalistic library for building text-mode applications without curses"
   :author "StackSmith <fpgasm@apple2.x10.mx>"
   :license "MIT license"
   :serial t
